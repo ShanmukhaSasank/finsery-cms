@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finsery — Submissions History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0f11;
+      --surface:   #16181c;
+      --surface2:  #1e2026;
+      --border:    #2a2d35;
+      --border-lt: #363a45;
+      --text:      #e8e6e0;
+      --muted:     #7a7d87;
+      --accent:    #d4a843;
+      --accent-dk: #b8902e;
+      --accent-lt: rgba(212,168,67,0.12);
+      --green:     #3dba7a;
+      --green-lt:  rgba(61,186,122,0.1);
+      --red:       #e05555;
+      --red-lt:    rgba(224,85,85,0.1);
+      --blue:      #5b9cf6;
+      --blue-lt:   rgba(91,156,246,0.1);
+      --radius:    8px;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14,15,17,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .header-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .new-btn {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .new-btn:hover { background: var(--accent-dk); }
+
+    /* ── Page ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      gap: 20px;
+    }
+
+    .page-title {
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 0.05s; }
+    .stat-card:nth-child(3) { animation-delay: 0.10s; }
+    .stat-card:nth-child(4) { animation-delay: 0.15s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-value.green { color: var(--green); }
+    .stat-value.gold  { color: var(--accent); }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 360px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #searchInput {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px 9px 36px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #searchInput:focus { border-color: var(--accent); }
+    #searchInput::placeholder { color: var(--muted); }
+
+    .filter-select {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 32px 9px 12px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a7d87' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--accent); }
+    .filter-select option { background: var(--surface2); }
+
+    .results-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 14px 20px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      animation: fadeUp 0.3s ease both;
+      cursor: pointer;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+
+    td {
+      padding: 16px 20px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .td-id {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .td-title {
+      font-weight: 500;
+      color: var(--text);
+      max-width: 280px;
+    }
+
+    .td-title .title-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+
+    .td-title .meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .badge-green  { background: var(--green-lt);  color: var(--green); border: 1px solid rgba(61,186,122,0.2); }
+    .badge-gold   { background: var(--accent-lt); color: var(--accent); border: 1px solid rgba(212,168,67,0.2); }
+    .badge-red    { background: var(--red-lt);    color: var(--red);   border: 1px solid rgba(224,85,85,0.2); }
+    .badge-blue   { background: var(--blue-lt);   color: var(--blue);  border: 1px solid rgba(91,156,246,0.2); }
+    .badge-muted  { background: rgba(122,125,135,0.1); color: var(--muted); border: 1px solid rgba(122,125,135,0.2); }
+
+    .wp-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-lt);
+      border: 1px solid rgba(61,186,122,0.2);
+      border-radius: 6px;
+      padding: 6px 12px;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .wp-link-btn:hover { background: rgba(61,186,122,0.18); border-color: rgba(61,186,122,0.4); }
+
+    .no-link {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .td-date {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state p { font-size: 14px; }
+
+    /* ── Loading ── */
+    .loading-row td {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Detail modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border-lt);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body { padding: 24px 28px 28px; }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .modal-field { display: flex; flex-direction: column; gap: 5px; }
+    .modal-field.full { grid-column: 1 / -1; }
+
+    .modal-field-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .modal-field-value {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .modal-wp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--green);
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px 20px;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: opacity 0.15s;
+    }
+    .modal-wp-btn:hover { opacity: 0.85; }
+
+    .refresh-btn {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .refresh-btn:hover { color: var(--text); border-color: var(--border-lt); }
+
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      .page { padding: 32px 16px 0; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      th, td { padding: 12px 14px; }
+      .modal-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Fin<em>sery</em></a>
+  <div class="header-tag">Editorial Desk</div>
+  <div class="header-right">
+    <a href="/" class="new-btn">+ New Article</a>
+  </div>
+</header>
+
+<div class="page">
+  <div class="page-eyebrow">Dashboard</div>
+  <div class="page-header">
+    <h1 class="page-title">Submissions History</h1>
+    <button class="refresh-btn" onclick="loadSubmissions()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M10.5 2A5 5 0 1 0 11 6"/>
+        <path d="M10.5 2V5h-3"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-label">Total Articles</div><div class="stat-value gold" id="statTotal">—</div></div>
+    <div class="stat-card"><div class="stat-label">Pipeline Triggered</div><div class="stat-value green" id="statTriggered">—</div></div>
+    <div class="stat-card"><div class="stat-label">WP Drafts Created</div><div class="stat-value" id="statDrafts">—</div></div>
+    <div class="stat-card"><div class="stat-label">Saved Only</div><div class="stat-value" id="statSaved">—</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="6" cy="6" r="4"/><path d="M9.5 9.5l3 3"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search by title or keyword…"/>
+    </div>
+    <select class="filter-select" id="filterSpec">
+      <option value="">All Specs</option>
+      <option value="beginner">Beginner</option>
+      <option value="advanced">Advanced</option>
+      <option value="both">Both</option>
+    </select>
+    <select class="filter-select" id="filterStatus">
+      <option value="">All Statuses</option>
+      <option value="triggered">Triggered</option>
+      <option value="skipped">Saved Only</option>
+      <option value="n8n_error">Error</option>
+    </select>
+    <select class="filter-select" id="filterCategory">
+      <option value="">All Categories</option>
+      <option>Savings</option>
+      <option>Investing</option>
+      <option>Credit Cards</option>
+      <option>Loans</option>
+      <option>Budgeting</option>
+      <option>Insurance</option>
+      <option>Taxes</option>
+      <option>Retirement</option>
+      <option>Banking</option>
+      <option>Real Estate</option>
+    </select>
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Content ID</th>
+          <th>Title</th>
+          <th>Spec</th>
+          <th>Category</th>
+          <th>Pipeline</th>
+          <th>WP Draft</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="loading-row">
+          <td colspan="7">
+            <div class="spinner"></div>
+            <div>Loading submissions…</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  let allSubmissions = [];
+
+  async function loadSubmissions() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="7"><div class="spinner"></div><div>Loading…</div></td></tr>`;
+
+    try {
+      const res = await fetch('/submissions');
+      allSubmissions = await res.json();
+      updateStats(allSubmissions);
+      renderTable(allSubmissions);
+    } catch (e) {
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--red)">Failed to load submissions. Make sure the server is running.</td></tr>`;
+    }
+  }
+
+  function updateStats(data) {
+    document.getElementById('statTotal').textContent = data.length;
+    document.getElementById('statTriggered').textContent = data.filter(r => r.n8n_status === 'triggered').length;
+    document.getElementById('statDrafts').textContent = data.filter(r => r.wp_draft_link).length;
+    document.getElementById('statSaved').textContent = data.filter(r => r.n8n_status === 'skipped').length;
+  }
+
+  function formatDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function statusBadge(status) {
+    const map = {
+      'triggered':     ['badge-green', '⚡ Triggered'],
+      'skipped':       ['badge-muted', '💾 Saved Only'],
+      'n8n_error':     ['badge-red',   '✗ Error'],
+      'n8n_unreachable': ['badge-red', '✗ Unreachable'],
+      'pending':       ['badge-gold',  '⏳ Pending'],
+    };
+    const [cls, label] = map[status] || ['badge-muted', status];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function specBadge(spec) {
+    const map = {
+      'beginner': ['badge-blue',  'Beginner'],
+      'advanced': ['badge-gold',  'Advanced'],
+      'both':     ['badge-green', 'Both'],
+    };
+    const [cls, label] = map[spec] || ['badge-muted', spec];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    document.getElementById('resultsCount').textContent = `${data.length} submission${data.length !== 1 ? 's' : ''}`;
+
+    if (!data.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>No submissions found</p>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map((row, i) => `
+      <tr onclick="openModal(${row.id})" style="animation-delay:${i * 0.03}s">
+        <td class="td-id">${row.content_id || '—'}</td>
+        <td class="td-title">
+          <div class="title-text">${row.title}</div>
+          <div class="meta">${row.primary_keyword} · ${row.tone}</div>
+        </td>
+        <td>${specBadge(row.content_specification)}</td>
+        <td><span class="badge badge-muted">${row.category}</span></td>
+        <td>${statusBadge(row.n8n_status)}</td>
+        <td>
+          ${row.wp_draft_link
+            ? `<a href="${row.wp_draft_link}" target="_blank" class="wp-link-btn" onclick="event.stopPropagation()">
+                Open Draft ↗
+               </a>`
+            : `<span class="no-link">Pending…</span>`
+          }
+        </td>
+        <td class="td-date">${formatDate(row.submitted_at)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function filterTable() {
+    const search   = document.getElementById('searchInput').value.toLowerCase();
+    const spec     = document.getElementById('filterSpec').value;
+    const status   = document.getElementById('filterStatus').value;
+    const category = document.getElementById('filterCategory').value;
+
+    const filtered = allSubmissions.filter(r => {
+      const matchSearch   = !search   || r.title.toLowerCase().includes(search) || (r.primary_keyword||'').toLowerCase().includes(search);
+      const matchSpec     = !spec     || r.content_specification === spec;
+      const matchStatus   = !status   || r.n8n_status === status;
+      const matchCategory = !category || r.category === category;
+      return matchSearch && matchSpec && matchStatus && matchCategory;
+    });
+
+    renderTable(filtered);
+  }
+
+  function openModal(id) {
+    const row = allSubmissions.find(r => r.id === id);
+    if (!row) return;
+
+    document.getElementById('modalTitle').textContent = row.title;
+
+    const yesNo = val => val === 'yes'
+      ? '<span class="badge badge-green">Yes</span>'
+      : '<span class="badge badge-muted">No</span>';
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-grid">
+        <div class="modal-field">
+          <div class="modal-field-label">Content ID</div>
+          <div class="modal-field-value" style="font-family:'IBM Plex Mono',monospace;color:var(--accent)">${row.content_id || '—'}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Submitted</div>
+          <div class="modal-field-value">${formatDate(row.submitted_at)}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Primary Keyword</div>
+          <div class="modal-field-value">${row.primary_keyword}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Intent</div>
+          <div class="modal-field-value">${row.intent}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Tone</div>
+          <div class="modal-field-value">${row.tone}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Target Audience</div>
+          <div class="modal-field-value">${row.target_audience}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Content Spec</div>
+          <div class="modal-field-value">${specBadge(row.content_specification)}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Word Count</div>
+          <div class="modal-field-value">${row.word_count?.toLocaleString()}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Category</div>
+          <div class="modal-field-value">${row.category}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Brand Mention</div>
+          <div class="modal-field-value">${row.brand_mention || '—'}</div>
+        </div>
+        <div class="modal-field full">
+          <div class="modal-field-label">Angle</div>
+          <div class="modal-field-value">${row.angle}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Story Hook</div>
+          <div class="modal-field-value">${yesNo(row.story_hook)}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Key Takeaway</div>
+          <div class="modal-field-value">${yesNo(row.key_takeaway)}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Pro Tip</div>
+          <div class="modal-field-value">${yesNo(row.finsery_pro_tip)}</div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-field-label">Accordion</div>
+          <div class="modal-field-value">${yesNo(row.accordion)}</div>
+        </div>
+        ${row.avoid ? `
+        <div class="modal-field full">
+          <div class="modal-field-label">Avoid</div>
+          <div class="modal-field-value">${row.avoid}</div>
+        </div>` : ''}
+        ${row.reference_links ? `
+        <div class="modal-field full">
+          <div class="modal-field-label">Reference Links</div>
+          <div class="modal-field-value" style="font-size:12px">${row.reference_links}</div>
+        </div>` : ''}
+        <div class="modal-field full">
+          <div class="modal-field-label">Pipeline Status</div>
+          <div class="modal-field-value">${statusBadge(row.n8n_status)}</div>
+        </div>
+      </div>
+      ${row.wp_draft_link ? `
+        <a href="${row.wp_draft_link}" target="_blank" class="modal-wp-btn">
+          Open WP Draft ↗
+        </a>` : `
+        <div style="margin-top:20px;font-size:13px;color:var(--muted);font-style:italic">
+          WP draft link will appear here once the pipeline completes.
+        </div>`
+      }
+    `;
+
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+  document.getElementById('searchInput').addEventListener('input', filterTable);
+  document.getElementById('filterSpec').addEventListener('change', filterTable);
+  document.getElementById('filterStatus').addEventListener('change', filterTable);
+  document.getElementById('filterCategory').addEventListener('change', filterTable);
+
+  // Auto-refresh every 30 seconds
+  loadSubmissions();
+  setInterval(loadSubmissions, 30000);
+</script>
+</body>
+</html>
