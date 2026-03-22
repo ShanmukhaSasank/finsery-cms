@@ -619,16 +619,7 @@
 
         <div class="field">
           <label>Target Audience <span class="req">*</span></label>
-          <select id="target_audience" name="target_audience">
-            <option value="">— Select —</option>
-            <option>Gen Z (18–25)</option>
-            <option>Millennials (26–40)</option>
-            <option>Gen X (41–55)</option>
-            <option>Boomers (56+)</option>
-            <option>First-time Investors</option>
-            <option>Small Business Owners</option>
-            <option>High-Net-Worth Individuals</option>
-          </select>
+          <input type="text" id="target_audience" name="target_audience" value="US Consumers" readonly style="opacity:0.5;cursor:not-allowed;"/>
           <span class="field-err" id="target_audience-err">Target audience is required.</span>
         </div>
 
@@ -638,7 +629,6 @@
             <option value="">— Select —</option>
             <option value="beginner">Beginner</option>
             <option value="advanced">Advanced</option>
-            <option value="both">Both (Beginner + Advanced)</option>
           </select>
           <span class="field-err" id="content_specification-err">Content spec is required.</span>
         </div>
@@ -651,7 +641,7 @@
 
         <div class="field">
           <label>Brand Mention</label>
-          <input type="text" id="brand_mention" name="brand_mention" placeholder="e.g. Finsery, NerdWallet"/>
+          <input type="text" id="brand_mention" name="brand_mention" value="Finsery" readonly style="opacity:0.5;cursor:not-allowed;"/>
         </div>
 
         <div class="field full">
@@ -796,7 +786,7 @@
 
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
-  const BACKEND_URL = 'https://finsery-cms-production.up.railway.app/submit';
+  const BACKEND_URL = 'http://localhost:3000/submit';
 
   // ── Content ID ──────────────────────────────────────────────────────────
   function genContentId() {
@@ -850,7 +840,7 @@
 
   // ── Validation ───────────────────────────────────────────────────────────
   const required = ['title', 'primary_keyword', 'category', 'intent', 'tone',
-                    'target_audience', 'content_specification', 'word_count', 'angle'];
+                    'content_specification', 'word_count', 'angle'];
 
   function validateField(id) {
     const el = document.getElementById(id);
