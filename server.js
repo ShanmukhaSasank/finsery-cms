@@ -9,7 +9,7 @@ const app = express();
 const PORT = 3000;
 
 // ── Config ──────────────────────────────────────────────────────────────────
-const N8N_WEBHOOK_URL = 'https://n8n.finsery-staging.com/webhook-test/finsery-article';
+const N8N_WEBHOOK_URL = 'https://n8n.finsery-staging.com/webhook/finsery-article';
 // ↑ Replace with your actual n8n Webhook node URL
 
 const DB_PATH = path.join(__dirname, 'finsery.db');
