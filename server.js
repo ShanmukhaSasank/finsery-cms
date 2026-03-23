@@ -9,7 +9,7 @@ const app = express();
 const PORT = 3000;
 
 // ── Config ──────────────────────────────────────────────────────────────────
-const N8N_WEBHOOK_URL = 'https://n8n.finsery-staging.com/webhook/finsery-article';
+const N8N_WEBHOOK_URL = 'https://your-n8n-instance.com/webhook/finsery-article';
 // ↑ Replace with your actual n8n Webhook node URL
 
 const DB_PATH = path.join(__dirname, 'finsery.db');
@@ -139,6 +139,58 @@ app.patch('/submissions/:id/wp-draft', (req, res) => {
   saveDb();
   console.log(`🔗 WP draft saved for #${req.params.id}: ${wp_draft_link}`);
   res.json({ success: true });
+});
+
+// ── POST /submissions/:id/rerun — re-trigger n8n for a failed submission ─────
+app.post('/submissions/:id/rerun', async (req, res) => {
+  const r = db.exec('SELECT * FROM submissions WHERE id = ?', [req.params.id]);
+  if (!r.length || !r[0].values.length) return res.status(404).json({ error: 'Submission not found' });
+
+  const o = {};
+  r[0].columns.forEach((c, i) => { o[c] = r[0].values[0][i]; });
+  o.tags = JSON.parse(o.tags || '[]');
+
+  const payload = {
+    submission_id:         o.id,
+    content_id:            o.content_id,
+    title:                 o.title,
+    primary_keyword:       o.primary_keyword,
+    intent:                o.intent,
+    angle:                 o.angle,
+    finsery_pro_tip:       o.finsery_pro_tip,
+    content_specification: o.content_specification,
+    key_takeaway:          o.key_takeaway,
+    story_hook:            o.story_hook,
+    accordion:             o.accordion,
+    reference_links:       o.reference_links,
+    avoid:                 o.avoid,
+    brand_mention:         o.brand_mention,
+    tone:                  o.tone,
+    target_audience:       o.target_audience,
+    word_count:            o.word_count,
+    category:              o.category,
+    tags:                  o.tags,
+    submitted_at:          o.submitted_at
+  };
+
+  let n8nStatus = 'triggered';
+  try {
+    const n8nRes = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    n8nStatus = n8nRes.ok ? 'triggered' : 'n8n_error';
+    console.log(`🔁 Re-run n8n: ${n8nStatus} for #${o.id}`);
+  } catch (e) {
+    n8nStatus = 'n8n_unreachable';
+    console.warn('⚠️  n8n unreachable on rerun:', e.message);
+  }
+
+  db.run('UPDATE submissions SET n8n_status = ? WHERE id = ?', [n8nStatus, o.id]);
+  saveDb();
+
+  return res.json({ success: true, submission_id: o.id, n8n_status: n8nStatus });
 });
 
 // ── GET /submissions ─────────────────────────────────────────────────────────

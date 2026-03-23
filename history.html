@@ -521,6 +521,42 @@
     }
     .refresh-btn:hover { color: var(--text); border-color: var(--border-lt); }
 
+    .rerun-btn {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--red);
+      background: var(--red-lt);
+      border: 1px solid rgba(224,85,85,0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: all 0.15s;
+      vertical-align: middle;
+    }
+    .rerun-btn:hover { background: rgba(224,85,85,0.18); border-color: rgba(224,85,85,0.4); }
+    .rerun-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .modal-rerun-btn {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--red);
+      background: var(--red-lt);
+      border: 1px solid rgba(224,85,85,0.2);
+      border-radius: var(--radius);
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .modal-rerun-btn:hover { background: rgba(224,85,85,0.18); border-color: rgba(224,85,85,0.4); }
+    .modal-rerun-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     @media (max-width: 768px) {
       header { padding: 0 20px; }
       .page { padding: 32px 16px 0; }
@@ -711,7 +747,12 @@
         </td>
         <td>${specBadge(row.content_specification)}</td>
         <td><span class="badge badge-muted">${row.category}</span></td>
-        <td>${statusBadge(row.n8n_status)}</td>
+        <td>
+          ${statusBadge(row.n8n_status)}
+          ${(row.n8n_status === 'n8n_error' || row.n8n_status === 'n8n_unreachable')
+            ? `<button class="rerun-btn" onclick="event.stopPropagation();rerun(${row.id})" title="Re-run pipeline">↺ Re-run</button>`
+            : ''}
+        </td>
         <td>
           ${row.wp_draft_link
             ? `<a href="${row.wp_draft_link}" target="_blank" class="wp-link-btn" onclick="event.stopPropagation()">
@@ -837,6 +878,10 @@
           WP draft link will appear here once the pipeline completes.
         </div>`
       }
+      ${(row.n8n_status === 'n8n_error' || row.n8n_status === 'n8n_unreachable') ? `
+        <button class="modal-rerun-btn" onclick="rerun(${row.id})">
+          ↺ Re-run Pipeline
+        </button>` : ''}
     `;
 
     document.getElementById('modalOverlay').classList.add('show');
@@ -848,6 +893,45 @@
 
   function closeModalDirect() {
     document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  async function rerun(id) {
+    const row = allSubmissions.find(r => r.id === id);
+    if (!row) return;
+
+    // Update UI immediately
+    const btn = document.querySelector(`[data-rerun="${id}"]`);
+    const modalBtn = document.getElementById('modalRerunBtn');
+
+    const setLoading = (el) => { if (el) { el.disabled = true; el.textContent = '⏳ Running…'; } };
+    const setSuccess = (el) => { if (el) { el.textContent = '✓ Triggered!'; el.style.background = 'var(--green-lt)'; el.style.color = 'var(--green)'; el.style.borderColor = 'rgba(61,186,122,0.3)'; } };
+    const setError   = (el) => { if (el) { el.disabled = false; el.textContent = '↺ Re-run'; } };
+
+    setLoading(btn);
+    setLoading(modalBtn);
+
+    try {
+      const res = await fetch(`/submissions/${id}/rerun`, { method: 'POST' });
+      const data = await res.json();
+
+      if (data.n8n_status === 'triggered') {
+        // Update local data
+        const idx = allSubmissions.findIndex(r => r.id === id);
+        if (idx !== -1) allSubmissions[idx].n8n_status = 'triggered';
+        setSuccess(btn);
+        setSuccess(modalBtn);
+        // Re-render table to reflect new status
+        filterTable();
+      } else {
+        setError(btn);
+        setError(modalBtn);
+        alert('Re-run failed: n8n could not be reached. Check your webhook URL.');
+      }
+    } catch (e) {
+      setError(btn);
+      setError(modalBtn);
+      alert('Re-run failed: ' + e.message);
+    }
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
