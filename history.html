@@ -750,7 +750,7 @@
         <td>
           ${statusBadge(row.n8n_status)}
           ${(row.n8n_status === 'n8n_error' || row.n8n_status === 'n8n_unreachable')
-            ? `<button class="rerun-btn" onclick="event.stopPropagation();rerun(${row.id})" title="Re-run pipeline">↺ Re-run</button>`
+            ? `<button class="rerun-btn" data-rerun="${row.id}" onclick="event.stopPropagation();rerun(${row.id})" title="Re-run pipeline">↺ Re-run</button>`
             : ''}
         </td>
         <td>
@@ -879,7 +879,7 @@
         </div>`
       }
       ${(row.n8n_status === 'n8n_error' || row.n8n_status === 'n8n_unreachable') ? `
-        <button class="modal-rerun-btn" onclick="rerun(${row.id})">
+        <button class="modal-rerun-btn" id="modalRerunBtn" onclick="rerun(${row.id})">
           ↺ Re-run Pipeline
         </button>` : ''}
     `;
@@ -899,37 +899,44 @@
     const row = allSubmissions.find(r => r.id === id);
     if (!row) return;
 
-    // Update UI immediately
-    const btn = document.querySelector(`[data-rerun="${id}"]`);
+    const tableBtn = document.querySelector(`[data-rerun="${id}"]`);
     const modalBtn = document.getElementById('modalRerunBtn');
 
-    const setLoading = (el) => { if (el) { el.disabled = true; el.textContent = '⏳ Running…'; } };
-    const setSuccess = (el) => { if (el) { el.textContent = '✓ Triggered!'; el.style.background = 'var(--green-lt)'; el.style.color = 'var(--green)'; el.style.borderColor = 'rgba(61,186,122,0.3)'; } };
-    const setError   = (el) => { if (el) { el.disabled = false; el.textContent = '↺ Re-run'; } };
-
-    setLoading(btn);
-    setLoading(modalBtn);
+    // Set loading state
+    [tableBtn, modalBtn].forEach(btn => {
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Running…'; }
+    });
 
     try {
       const res = await fetch(`/submissions/${id}/rerun`, { method: 'POST' });
       const data = await res.json();
 
       if (data.n8n_status === 'triggered') {
-        // Update local data
+        // Update local data so table reflects new status without full reload
         const idx = allSubmissions.findIndex(r => r.id === id);
         if (idx !== -1) allSubmissions[idx].n8n_status = 'triggered';
-        setSuccess(btn);
-        setSuccess(modalBtn);
-        // Re-render table to reflect new status
+
+        [tableBtn, modalBtn].forEach(btn => {
+          if (btn) {
+            btn.textContent = '✓ Triggered!';
+            btn.style.background = 'var(--green-lt)';
+            btn.style.color = 'var(--green)';
+            btn.style.borderColor = 'rgba(61,186,122,0.3)';
+          }
+        });
+
+        // Re-render table to remove rerun button from that row
         filterTable();
       } else {
-        setError(btn);
-        setError(modalBtn);
-        alert('Re-run failed: n8n could not be reached. Check your webhook URL.');
+        [tableBtn, modalBtn].forEach(btn => {
+          if (btn) { btn.disabled = false; btn.textContent = '↺ Re-run'; }
+        });
+        alert('Re-run failed: n8n returned an error. Check your webhook URL and workflow status.');
       }
     } catch (e) {
-      setError(btn);
-      setError(modalBtn);
+      [tableBtn, modalBtn].forEach(btn => {
+        if (btn) { btn.disabled = false; btn.textContent = '↺ Re-run'; }
+      });
       alert('Re-run failed: ' + e.message);
     }
   }
